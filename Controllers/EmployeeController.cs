@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using EmployeeManagementApp.Filters;
 
 namespace EmployeeManagementApp.Controllers
 {
@@ -38,7 +37,7 @@ namespace EmployeeManagementApp.Controllers
             {
                 new Claim(ClaimTypes.NameIdentifier, emp.Id.ToString()),
                 new Claim(ClaimTypes.Name, emp.FullName),
-                new Claim(ClaimTypes.Role, Role.getRoleTypeString(emp.RoleId)),
+                new Claim(ClaimTypes.Role, emp.Role.ToString()),
             };
 
             var claimsIdentity = new ClaimsIdentity(
@@ -51,16 +50,16 @@ namespace EmployeeManagementApp.Controllers
             return Ok("Login succesfull!");
         }
 
-        [HttpPost("logout")]
         [Authorize]
+        [HttpPost(UrlRoute.LOGOUT)]
         public IActionResult Logout()
         {
             HttpContext.SignOutAsync();
             return Ok("Logged out successfully");
         }
 
+        [Authorize(Roles = "MANAGER")]
         [HttpPost(UrlRoute.EMPLOYEE_CREATE)]
-        [EMA_Auth(Roles = "MANAGER")]
         public IActionResult CreateEmployee([FromBody] EmployeeDto emp)
         {
             Employee employee = new Employee() {
@@ -68,7 +67,7 @@ namespace EmployeeManagementApp.Controllers
                 Username = emp.Username,
                 Password = emp.Password,
                 DOB = emp.DOB,
-                RoleId = (int)RoleTypes.EMPLOYEE,
+                Role = Role.Types.EMPLOYEE,
                 ManagerId = emp.ManagerId
             };
 
@@ -77,9 +76,8 @@ namespace EmployeeManagementApp.Controllers
             return Ok("Employee Successfully Created!");
         }
 
+        [Authorize(Roles = "MANAGER")]
         [HttpPost(UrlRoute.LEAVE_REQUEST_APPROVE)]
-        [EMA_Auth(Roles = "MANAGER")]
-        //Note: Approves the oldest leave
         public IActionResult ApproveLeave([FromBody] LeaveApproveDto leaveReq)
         {
             if (!ModelState.IsValid)
@@ -122,9 +120,48 @@ namespace EmployeeManagementApp.Controllers
                 ErrorMessage = "Invalid Leave id"
             });
         }
+        private int _getEmpIdFromClaim()
+        {
+            int id = -1;
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out id))
+            {
+                return -1;
+            }
+            return id;
+        }
 
+        [Authorize(Roles = "EMPLOYEE")]
+        [HttpGet(UrlRoute.EMPLOYEE_VIEW)]
+        public IActionResult EmployeeView()
+        {
+            int id = _getEmpIdFromClaim();
+            if (id == -1)
+            {
+                return BadRequest("Invalid or missing user ID claim");
+            }
+            var employee = _dataStore.isValidEmployee(id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            return Ok(employee);
+        }
+
+        [Authorize(Roles = "MANAGER")]
+        [HttpGet(UrlRoute.MANAGER_REPORTEES)]
+        public IActionResult GetManagerReportees() 
+        {
+            int empid = _getEmpIdFromClaim();
+            if (empid == -1)
+                return BadRequest("Invalid or missing user ID claim");
+
+            var employess = _dataStore.GetReportersForManager(empid);
+            return Ok(employess);
+        }
+
+        [Authorize(Roles = "EMPLOYEE")]
         [HttpPost(UrlRoute.LEAVE_REQUEST_CREATE)]
-        [EMA_Auth(Roles = "EMPLOYEE")]
         public IActionResult ApplyLeave([FromBody] LeaveRequestDto leave)
         {
             if (!ModelState.IsValid)
@@ -160,7 +197,6 @@ namespace EmployeeManagementApp.Controllers
 
             return Ok("Leave successfully created!");
         }
-
-        
     }
+
 }

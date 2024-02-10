@@ -15,10 +15,19 @@ namespace EmployeeManagementApp
 
         public const string HOME        
             = $"{API_URL}{VERSION}/";
+
         public const string LOGIN        
             = $"{API_URL}{VERSION}/login";
+
+        public const string LOGOUT        
+            = $"{API_URL}{VERSION}/logout";
+
         public const string EMPLOYEES   
             = $"{API_URL}{VERSION}/employees";
+
+        public const string EMPLOYEE_VIEW   
+            = $"{API_URL}{VERSION}/employees/profile";
+
         public const string EMPLOYEE_CREATE   
             = $"{API_URL}{VERSION}/employees/create";
 
@@ -31,6 +40,8 @@ namespace EmployeeManagementApp
         public const string MANAGERS    
             = $"{API_URL}{VERSION}/managers";
 
+        public const string MANAGER_REPORTEES =
+            "/managers/manager/reportees";
     }
 
 }

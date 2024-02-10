@@ -6,14 +6,52 @@ namespace EmployeeManagementApp.Data
     public class DataStore 
     {
         List<Employee> Employees;
-        List<Role> Roles;
         List<LeaveRequest> LeaveRequests;
 
         public DataStore()
         {
             Employees = new List<Employee>();
-            Roles = new List<Role>();
             LeaveRequests = new List<LeaveRequest>();
+
+            _Seeder();
+        }
+
+        private void _Seeder()
+        {
+            Employees.Add(new Employee
+            {
+                Username = "admin",
+                FullName = "Administrator",
+                Password = "password",
+                Role = Role.Types.MANAGER
+            });
+        }
+        public IEnumerable<Employee> GetReportersForManager(int id)
+        {
+            List<Employee> employees = new List<Employee>();
+            foreach(var employee in Employees)
+            {
+                if (employee.ManagerId == id)
+                    employees.Add(employee);
+            }
+
+            var employess = new List<Employee>();
+
+            foreach (var employee in employees)
+            {
+                var employeeWithoutPassword = new Employee
+                {
+                    Id = employee.Id,
+                    FullName = employee.FullName,
+                    Role = employee.Role,
+                    ManagerId = employee.ManagerId,
+                    Username = employee.Username,
+                    Password = "*************",
+                };
+
+                employess.Add(employeeWithoutPassword);
+            }
+            return employess;
         }
 
         public void AddEmployee(Employee emp)
@@ -42,7 +80,7 @@ namespace EmployeeManagementApp.Data
             foreach(var employee in Employees)
             {
                 if ((employee.Id ==  employeeId)
-                && (employee.RoleId == (int)RoleTypes.EMPLOYEE))
+                && (employee.Role == Role.Types.EMPLOYEE))
                 return employee;
             }
             return null;
@@ -64,7 +102,7 @@ namespace EmployeeManagementApp.Data
             foreach(var employee in Employees)
             {
                 if ((employee.Id ==  employeeId)
-                && (employee.RoleId == (int)RoleTypes.MANAGER))
+                && (employee.Role == Role.Types.MANAGER))
                 return employee;
             }
             return null;

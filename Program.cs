@@ -1,14 +1,11 @@
 using EmployeeManagementApp.Data;
-using EmployeeManagementApp.Filters;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers( options => {
-    options.Filters.Add<EMA_Auth>();
-});
+builder.Services.AddControllers();
 
 // Data store (DB replacement)
 builder.Services.AddSingleton<DataStore>();

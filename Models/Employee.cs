@@ -23,17 +23,10 @@ namespace EmployeeManagementApp.Models
         public DateTime DOB { get; set; }
 
         [Required]
-        public int RoleId { get; set; }
+        public Role.Types Role { get; set; }
 
         [Required]
         public int ManagerId {get; set; }
-
-        [ForeignKey("RoleId")]
-        public virtual Role Role { get; set; }
-
-
-        [ForeignKey("ManagerId")]
-        public virtual Employee Manager { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 

@@ -3,42 +3,33 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EmployeeManagementApp.Models 
 {
-    public enum RoleTypes {
-
-        CEO         = 0,
-        MANAGER     = 1,
-        EMPLOYEE    = 2,
-
-        UNKNOWN
-    }
-
-
-    public class Role 
+    public static class Role 
     {
-        [Key]
-        public int Id {get; set;}
+        public enum Types {
 
-        [Required]
-        public RoleTypes Type { get; set; }
+            CEO         = 0,
+            MANAGER     = 1,
+            EMPLOYEE    = 2,
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+            UNKNOWN
+        }
 
-        public static RoleTypes getRoleType(string name)
+        public static Types getRoleType(string name)
         {
-            RoleTypes output;
+            Types output;
             try {
 
-                output = (RoleTypes)Enum.Parse(typeof(RoleTypes), name.ToUpper());
+                output = (Types)Enum.Parse(typeof(Types), name.ToUpper());
 
             } catch(ArgumentException) {
 
-                output = RoleTypes.UNKNOWN;
+                output = Role.Types.UNKNOWN;
             }
             return output;
         }
         public static string getRoleTypeString(int type)
         {
-            RoleTypes output = (RoleTypes)type;
+            Types output = (Types)type;
             Console.WriteLine($"{output} {output.ToString()}");
             return output.ToString();
         }
